@@ -11,6 +11,11 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
 
   mysql-bench:
     image: mysql:8.4
@@ -23,13 +28,22 @@ services:
       - "${MYSQL_PORT}:3306"
     volumes:
       - mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p${MYSQL_PASSWORD}"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
 
   app:
     build: .
     container_name: sql-benchmark-suite
+    env_file:
+      - .env
     depends_on:
-      - pg-bench
-      - mysql-bench
+      pg-bench:
+        condition: service_healthy
+      mysql-bench:
+        condition: service_healthy
     environment:
       # POSTGRES
       POSTGRES_HOST: pg-bench
@@ -40,11 +54,12 @@ services:
 
       # MYSQL
       MYSQL_HOST: mysql-bench
+      MYSQL_USER: ${MYSQL_USER}
       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DB}
+      MYSQL_DB: ${MYSQL_DB}
       MYSQL_PORT: ${MYSQL_PORT}
 
-    volumes:              
+    volumes:
       - ./src/benchmark/results:/app/src/benchmark/results
 
 volumes:

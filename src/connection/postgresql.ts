@@ -2,7 +2,7 @@ import postgres from "postgres";
 
 let client: postgres.Sql | null = null;
 
-export async function getPostgresClient(): Promise<postgres.Sql> {
+export async function postgresConnection(): Promise<postgres.Sql> {
   if (!client) {
     client = postgres({
       host: process.env.POSTGRES_HOST,
@@ -13,16 +13,15 @@ export async function getPostgresClient(): Promise<postgres.Sql> {
     });
   }
 
-  // await dbTestSchemaSetup(client);
   return client;
 }
 
-export async function dbTestSchemaSetup(db: postgres.Sql) {
-  await db`
+export async function postgresSchemaSetup(db: postgres.Sql) {
+  db`
     CREATE TABLE IF NOT EXISTS test (
       id SERIAL PRIMARY KEY,
       value INTEGER NOT NULL
     );
   `;
-  await db`TRUNCATE TABLE test;`;
+  db`TRUNCATE TABLE test;`;
 }

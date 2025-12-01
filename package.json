@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "dotenv": "^17.2.3",
+    "mysql": "github:mysqljs/mysql",
     "mysql2": "^3.9.0",
     "postgres": "^3.4.0"
   },

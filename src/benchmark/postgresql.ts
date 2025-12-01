@@ -1,30 +1,49 @@
-
-import postgres from "postgres";
-import { dbTestSchemaSetup } from "../connection/postgresql";
+import { BenchmarkInterface } from "./benchmarkInterface";
 import { measure } from "../util/measure";
 import { saveBenchmarkResults } from "../util/saveResults";
+import postgres from "postgres";
+import { postgresConnection, postgresSchemaSetup } from "../connection/postgresql";
 
-export async function benchmarkPostgres(
-  db: postgres.Sql,
-  ops: number = 10000
-) {
-  console.log("\n--- PostgreSQL Benchmark ---");
+export class PostgreSQLBenchmark implements BenchmarkInterface {
+  name = "PostgreSQL";
+  db: postgres.Sql;
 
-  const benchmarkResults: string[] = [];
+  constructor(db: postgres.Sql) {
+    this.db = db;
+  }
 
-  await dbTestSchemaSetup(db);
+  async completeBenchmark(n: number): Promise<void> {
+    const results: string[] = [];
 
-  await measure(`INSERT ${ops}`, async () => {
-    for (let i = 0; i < ops; i++) {
-      await db`INSERT INTO test(value) VALUES (${i})`;
+    await measure("SETUP", () => postgresSchemaSetup(this.db), results);
+    await measure(`INSERT ${n}`, () => this.writeBenchmark(n), results);
+    await measure("SELECT COUNT", () => this.readBenchmark(0), results);
+
+    saveBenchmarkResults(results, this.name);
+
+    await this.db.end();
+  }
+
+  async writeBenchmark(n: number): Promise<number> {
+    const start = performance.now();
+
+    for (let i = 0; i < n; i++) {
+      await this.db`INSERT INTO test(value) VALUES (${i})`;
     }
-  }, benchmarkResults);
 
-  await measure("SELECT COUNT", async () => {
-    await db`SELECT COUNT(*) FROM test`;
-  }, benchmarkResults);
+    return performance.now() - start;
+  }
 
-  await db.end();
+  async readBenchmark(_: number): Promise<number> {
+    const start = performance.now();
 
-  saveBenchmarkResults(benchmarkResults, "postgresql");
+    await this.db`SELECT COUNT(*) FROM test`;
+
+    return performance.now() - start;
+  }
+}
+
+export async function createDefaultPostgresBenchmark() {
+  const db = await postgresConnection();
+  return new PostgreSQLBenchmark(db);
 }
