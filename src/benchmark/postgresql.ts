@@ -17,7 +17,7 @@ export class PostgreSQLBenchmark implements BenchmarkInterface {
 
     await measure("SETUP", () => postgresSchemaSetup(this.db), results);
     await measure(`INSERT ${n}`, () => this.writeBenchmark(n), results);
-    await measure("SELECT COUNT", () => this.readBenchmark(0), results);
+    await measure("SELECT *", () => this.readBenchmark(0), results);
 
     saveBenchmarkResults(results, this.name, n);
 
@@ -37,7 +37,7 @@ export class PostgreSQLBenchmark implements BenchmarkInterface {
   async readBenchmark(_: number): Promise<number> {
     const start = performance.now();
 
-    await this.db`SELECT COUNT(*) FROM test`;
+    await this.db`SELECT * FROM test`;
 
     return performance.now() - start;
   }

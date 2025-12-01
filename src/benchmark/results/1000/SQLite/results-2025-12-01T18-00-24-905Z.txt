@@ -1,0 +1,3 @@
+SETUP: 0.90ms
+INSERT 1000: 21.07ms
+SELECT *: 0.14ms

@@ -16,7 +16,7 @@ export async function mysqlConnection() {
 }
 
 export async function mysqlSchemaSetup(db: mysql.Connection) {
-  await db.query(`
+   await db.query(`
     CREATE TABLE IF NOT EXISTS test (
       id INT AUTO_INCREMENT PRIMARY KEY,
       value INT NOT NULL

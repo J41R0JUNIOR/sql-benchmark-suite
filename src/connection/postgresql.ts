@@ -17,11 +17,11 @@ export async function postgresConnection(): Promise<postgres.Sql> {
 }
 
 export async function postgresSchemaSetup(db: postgres.Sql) {
-  db`
+  await db`
     CREATE TABLE IF NOT EXISTS test (
       id SERIAL PRIMARY KEY,
       value INTEGER NOT NULL
     );
   `;
-  db`TRUNCATE TABLE test;`;
+  await db`TRUNCATE TABLE test;`;
 }

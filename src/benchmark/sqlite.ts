@@ -16,7 +16,7 @@ export class SQLiteBenchmark implements BenchmarkInterface {
 
     await measure("SETUP", () => sqliteSchemaSetup(this.db), results);
     await measure(`INSERT ${n}`, () => this.writeBenchmark(n), results);
-    await measure("SELECT COUNT", () => this.readBenchmark(0), results);
+    await measure("SELECT *", () => this.readBenchmark(0), results);
 
     saveBenchmarkResults(results, this.name, n);
   }
@@ -24,15 +24,9 @@ export class SQLiteBenchmark implements BenchmarkInterface {
   async writeBenchmark(n: number): Promise<number> {
     const start = performance.now();
 
-    const insert = this.db.prepare(
-      `INSERT INTO test (value) VALUES (?)`
-    );
-
-    const tx = this.db.transaction(() => {
-      for (let i = 0; i < n; i++) insert.run(i);
-    });
-
-    tx();
+    for (let i = 0; i < n; i++) {
+      this.db.exec(`INSERT INTO test(value) VALUES (${i})`)
+    }
 
     return performance.now() - start;
   }
@@ -40,7 +34,7 @@ export class SQLiteBenchmark implements BenchmarkInterface {
   async readBenchmark(_: number): Promise<number> {
     const start = performance.now();
 
-    this.db.prepare(`SELECT COUNT(*) FROM test`).get();
+    this.db.exec(`SELECT * FROM test`);
 
     return performance.now() - start;
   }
