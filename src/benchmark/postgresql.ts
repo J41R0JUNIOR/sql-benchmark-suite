@@ -19,7 +19,7 @@ export class PostgreSQLBenchmark implements BenchmarkInterface {
     await measure(`INSERT ${n}`, () => this.writeBenchmark(n), results);
     await measure("SELECT COUNT", () => this.readBenchmark(0), results);
 
-    saveBenchmarkResults(results, this.name);
+    saveBenchmarkResults(results, this.name, n);
 
     await this.db.end();
   }

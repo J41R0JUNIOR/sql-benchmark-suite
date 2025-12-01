@@ -3,9 +3,10 @@ import path from "path";
 
 export function saveBenchmarkResults(
   results: string[],
-  dbName: string
+  dbName: string,
+  ops: number
 ) {
-  const folder = `src/benchmark/results/${dbName}`;
+  const folder = `src/benchmark/results/${ops}/${dbName}`;
   const resultsDir = path.resolve(process.cwd(), folder);
 
   if (!fs.existsSync(resultsDir)) {

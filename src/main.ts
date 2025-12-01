@@ -3,7 +3,7 @@ import { createDefaultMysqlBenchmark } from "./benchmark/mysql";
 import { createDefaultPostgresBenchmark } from "./benchmark/postgresql";
 
 async function main() {
-  const ops = 10000;
+  const ops = 100000;
 
   const mysqlBenchmark = await createDefaultMysqlBenchmark();
   await mysqlBenchmark.completeBenchmark(ops);
